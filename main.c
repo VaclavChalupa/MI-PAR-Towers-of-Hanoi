@@ -70,12 +70,15 @@ int main(int argc, char *argv[]) {
 
 	      printState(towers, towersCount);
 
-	      printf("min steps: %i\n", process(towers, towersCount, discsCount, destTower));
+	      process(towers, towersCount, discsCount, destTower);
 
 	      for(i = 0; i < towersCount; i++) {
 	    	  freeDiscs(&towers[i]);
 	      }
 	      free(towers);
+
+	      printf("\n***END***\n");
+
 	      return 0;
 
 	}

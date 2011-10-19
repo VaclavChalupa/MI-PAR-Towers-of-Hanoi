@@ -7,6 +7,6 @@
 #include <stdio.h>
 
 void printProcessItem(ProcessItem* processItem) {
-	printf("MOVE: disc(%i), source tower: %i, dest tower: %i", processItem->disc, processItem->sourceTower, processItem->destTower);
+	printf("\nMOVE: disc(%i), source tower: %i, dest tower: %i\n", processItem->disc, processItem->sourceTower, processItem->destTower);
 }
 

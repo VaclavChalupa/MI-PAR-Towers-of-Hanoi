@@ -17,12 +17,16 @@ Stack * initializeStack();
 
 void push(int* data, int step);
 
-int* top(int* step);
+int* top(int* step, int* i, int* j);
 
 void pop();
+
+void setState(int _i, int _j);
 
 int isStackEmpty();
 
 void freeStack();
+
+void setReturning();
 
 #endif /* STACK_H_ */

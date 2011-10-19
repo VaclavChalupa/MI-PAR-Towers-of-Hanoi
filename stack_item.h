@@ -9,7 +9,8 @@
 typedef struct StackItem {
 		int* data;
 		int step;
-		int num;
+		int i;
+		int j;
         struct StackItem *next;
 } StackItem;
 
