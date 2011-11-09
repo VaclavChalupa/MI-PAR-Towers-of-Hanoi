@@ -11,6 +11,7 @@ typedef struct StackItem {
 		int step;
 		int i;
 		int j;
+		int movedDisc;
         struct StackItem *next;
 } StackItem;
 

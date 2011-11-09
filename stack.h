@@ -15,9 +15,9 @@ typedef struct {
 
 Stack * initializeStack();
 
-void push(int* data, int step);
+void push(int* data, int step, int movedDisc);
 
-int* top(int* step, int* i, int* j);
+int* top(int* step, int* i, int* j, int* movedDisc);
 
 void pop();
 

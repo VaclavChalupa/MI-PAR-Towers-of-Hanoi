@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 
 	      printf("Towers of Hanoi: %i towers, %i discs, %i dest tower\n", towersCount, discsCount, destTower);
 
-	      towers = (Tower*) malloc (towersCount * sizeof(*towers));
+	      towers = (Tower*) malloc (towersCount * sizeof(Tower));
 
 	      for (i = 0; i < towersCount; i++) {
 	    	  char towerLine [ 128 ];
@@ -72,10 +72,7 @@ int main(int argc, char *argv[]) {
 
 	      process(towers, towersCount, discsCount, destTower);
 
-	      for(i = 0; i < towersCount; i++) {
-	    	  freeDiscs(&towers[i]);
-	      }
-	      free(towers);
+	      freeTowers(towers, &towersCount);
 
 	      printf("\n***END***\n");
 

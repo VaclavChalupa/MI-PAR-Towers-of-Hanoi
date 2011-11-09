@@ -34,30 +34,30 @@ static void processStepWithStack(struct SolutionQueue* sq);
 void freeInspectStack(struct SolutionQueue* sq);
 
 int*  serializeState(Tower* _towers) {
-	int * stack_item, i;
-	stack_item = (int*) malloc(discsCount * sizeof(int));
+	int * stack_item_data, i;
+	stack_item_data = (int*) malloc(discsCount * sizeof(int));
 
 	for(i = 0; i < discsCount; i++) {
-		stack_item[i] = -1;
+		stack_item_data[i] = -1;
 	}
 
 	for(i = 0; i < towersCount; i++) {
 		Disc* disc;
 		disc = _towers[i].top;
 		while(disc != NULL) {
-			stack_item[disc->size-1] = i; /* disc size -> tower indexed form 0*/
+			stack_item_data[disc->size-1] = i; /* disc size -> tower indexed form 0*/
 			disc = disc->next;
 		}
 	}
 
 	for(i = 0; i < discsCount; i++) {
-		if(stack_item[i] == -1) {
-			perror("ERROR: stack_item defect");
+		if(stack_item_data[i] == -1) {
+			perror("ERROR: stack_item_data defect by serialization");
 			return NULL;
 		}
 	}
 
-	return stack_item;
+	return stack_item_data;
 }
 
 Tower* deserializeState(int* data) {
@@ -102,45 +102,37 @@ void processStepWithStack(struct SolutionQueue* sq) {
 	counter = 0;
 
 	/* initial state */
-	push(serializeState(towers), 0);
+	push(serializeState(towers), 0, -1); /* no disc moved yet */
 
 	while(!isStackEmpty()) {
-		int step, iStart, jStart, i, moved = 0;
+		int step, iStart, jStart, prevMovedDisc, i, moved = 0;
 		int* stack_data;
 		Tower* _towers;
 
-		if(++counter % 10000 == 0) {
-			printf(".");
-		}
+		stack_data = top(&step, &iStart, &jStart, &prevMovedDisc);
 
-		stack_data = top(&step, &iStart, &jStart);
-
-		/*printf("STEP %i, num = %i\n", step, stack->num);*/
 		_towers = deserializeState(stack_data);
 
-		/*printf("\ni: %i; j: %i\n", iStart, jStart);
-				printf("----------\n");
-				printState(_towers, towersCount);
-				printf("----------\n");*/
-
 		if(step > max || loopDetected(stack)) {
-			/* not a perspective branch solution */
+			/* not a perspective solution branch */
 			pop();
+			freeTowers(_towers, &towersCount);
 			continue;
 		}
 
-		/* deserialize */
-
 		if (isDestTowerComplete(&_towers[destTower - 1], discsCount)) {
-			printf("\n\n\n\n\n\n\n\n\n\n\n\n-----------------------------------------------------------------------------------------FOUND %i\n", step);
+			printf("\n\n\n\n------------------------------------FOUND %i\n", step);
 			printState(_towers, towersCount);
 
 			if (step < minSteps) {
+				max = step;
 				minSteps = step;
 				inspectStack(stack, sq);
+				printf("\nMAX NOW: %i\n", max);
 			}
 
 			pop();
+			freeTowers(_towers, &towersCount);
 
 			if (step <= min) {
 				break;
@@ -160,17 +152,19 @@ void processStepWithStack(struct SolutionQueue* sq) {
 				resultDisc = move(&_towers[i],&_towers[j]);
 
 				if(resultDisc > 0) {
-					int* d = serializeState(_towers);
 					if(j+1 >= towersCount) {
 						setState(i+1, 0);
 					} else {
 						setState(i, j+1);
 					}
 					if(moved == 0) {
-						push(d, step+1);
-						moved++;
+
+						if(prevMovedDisc != resultDisc) {
+							push(serializeState(_towers), step+1, resultDisc);
+							moved++;
+							/*printf("\n\n\n DIFF MOVE: %i - %i", prevMovedDisc, resultDisc);*/
+						}
 					}
-					/*undoMove(&_towers[i],&_towers[j]);*/
 					break;
 				}
 				jStart = 0;
@@ -182,7 +176,8 @@ void processStepWithStack(struct SolutionQueue* sq) {
 		if(moved == 0) {
 			pop();
 		}
-		free(_towers);
+		/*  */
+		freeTowers(_towers, &towersCount);
 	}
 	freeStack();
 }
@@ -217,11 +212,6 @@ void inspectStack(Stack * stack, struct SolutionQueue* sq) {
 	n = NULL;
 
 	freeInspectStack(sq);
-	if(sq->head != NULL) {
-		printf("KUA");
-	} else {
-		printf("OKOK");
-	}
 
 	tmp = stack->top;
 	currentState = stack->top->data;
@@ -260,8 +250,9 @@ int process(Tower *_towers, int _size, int _discsCount, int _destTower) {
 	sq.head = NULL;
 
 	min = minMoves(towers, towersCount, discsCount, destTower);
-	max = minSteps = maxMoves(discsCount, towersCount);
-	max = 30;
+	max = maxMoves(discsCount, towersCount);
+	minSteps = max + 1;
+	/*max = 30;*/
 
 	printf("\nmin: %i, max: %i , %i", min, max, minSteps);
 
@@ -278,6 +269,8 @@ int process(Tower *_towers, int _size, int _discsCount, int _destTower) {
 	} else {
 		printf("\nERROR: No solution found\n");
 	}
+
+	freeInspectStack(&sq);
 
 	return minSteps;
 }
